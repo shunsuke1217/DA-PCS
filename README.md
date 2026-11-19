@@ -8,7 +8,7 @@ The tool is an extension of MTSA (Modal Transition System Analyser), and the mod
 ```
 .
 ├── target/
-│   └── mtsa-1.0-SNAPSHOT.jar   # MTSA extended with DA-PCS
+│   └── mtsa-1.0-SNAPSHOT.jar   # MTSA extended with DA-PCS (download from Releases, see below)
 └── model/
     ├── DC(2,K).lts             # Drone Control,     2 drones
     ├── DC(3,K).lts             # Drone Control,     3 drones
@@ -22,6 +22,20 @@ The tool is an extension of MTSA (Modal Transition System Analyser), and the mod
 
 - Java (JRE) to run the jar
 - Enough main memory for the larger models. The command below allocates 20 GB of heap; change `-Xmx20G` to suit your machine.
+
+## Downloading the tool
+
+The jar (about 640 MB) exceeds GitHub's file size limit, so it is not stored in the repository itself. Download it from the [Releases](https://github.com/shunsuke1217/DA-PCS/releases) page and place it under `target/`.
+
+**From the browser:** open the [latest release](https://github.com/shunsuke1217/DA-PCS/releases/latest), download `mtsa-1.0-SNAPSHOT.jar` from *Assets*, and move it to `target/` in the cloned repository.
+
+**From the command line** (run in the repository root):
+
+```bash
+mkdir -p target
+curl -L -o target/mtsa-1.0-SNAPSHOT.jar \
+  https://github.com/shunsuke1217/DA-PCS/releases/latest/download/mtsa-1.0-SNAPSHOT.jar
+```
 
 ## Running the tool
 
