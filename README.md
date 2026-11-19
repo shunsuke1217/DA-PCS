@@ -45,12 +45,24 @@ From the repository root:
 java -jar -Xmx20G ./target/mtsa-1.0-SNAPSHOT.jar
 ```
 
-This launches the MTSA GUI. Open one of the `.lts` files under `model/`, then use the toolbar buttons to choose the synthesis method:
+This launches the MTSA GUI. To run an experiment:
 
-| Button | Method                                  |
-|--------|-----------------------------------------|
-| **1**  | DA-PCS (proposed)                       |
-| **3**  | Exhaustive PCS (baseline)               |
+1. Choose **File → Open** and select one of the `.lts` files under `model/` (e.g. `model/DC(3,K).lts`). The model is shown in the editor.
+2. If needed, edit the size constants in the editor to set `K` (see [Models](#models)), then save the file.
+3. Click a numbered button in the toolbar to choose the synthesis method:
+
+   | Button | Method                                  |
+   |--------|-----------------------------------------|
+   | **1**  | DA-PCS (proposed)                       |
+   | **3**  | Exhaustive PCS (baseline)               |
+
+   Select **1** to run DA-PCS and **3** to run Exhaustive PCS. The buttons are the circled numbers ①②③ to the left of the target drop-down in the toolbar.
+4. The experiment starts as soon as the button is pressed; no further input is needed. The tool first runs pre-synthesis (synthesizing the PreControllers) and then re-synthesis for every possible environment change. Progress and results are printed in the **Output** tab, which opens automatically.
+5. When the run finishes, scroll the Output tab to read the results:
+   - The pre-synthesis summary follows the line `Pre-Controller Synthesis is Complete!`.
+   - The re-synthesis summary follows the line `All Synthesis is Complete!`, at the end of the log.
+
+See [Example: DC(3,2) with DA-PCS](#example-dc32-with-da-pcs) for what the output looks like.
 
 ## Models
 
@@ -78,3 +90,44 @@ const N = 6
 ```
 
 `N` is the maximum number of visitors counted in each area.
+
+## Example: DC(3,2) with DA-PCS
+
+This example runs DA-PCS (button **1**) on `model/DC(3,K).lts` with the constants as they are in the file (`N = 3`, `MaxX = MaxY = LIMIT_X = LIMIT_Y = 2`), which is the DC (N, K) = (3, 2) setting.
+
+Time and memory depend on the machine and the JVM settings. The run below was made on a Mac with `-Xmx20G`, while the paper's measurements were made on Windows 11 (Intel Core Ultra 9 285K, 128 GB). The numbers of PreControllers, states and transitions and the reuse rate do not depend on the machine, and they match the paper.
+
+### Pre-synthesis
+
+![Pre-synthesis result of DC(3,2) with DA-PCS](docs/screenshots/dc32_presynthesis.png)
+
+| Item                              | Value                     |
+|-----------------------------------|---------------------------|
+| Number of PreControllers          | 20                        |
+| States                            | 39,772 total (1,988 avg.) |
+| Transitions                       | 216,472 total (10,823 avg.) |
+| Synthesis time                    | 4,043 ms total (202 ms avg.) |
+| Dependency analysis time          | 4 ms                      |
+| Total time                        | 4,047 ms                  |
+| Maximum memory                    | 106,129 KB                |
+
+### Re-synthesis
+
+![Re-synthesis summary of DC(3,2) with DA-PCS](docs/screenshots/dc32_resynthesis_summary.png)
+
+| Item                                               | Value     |
+|----------------------------------------------------|-----------|
+| Environment change patterns                        | 63        |
+| Patterns with a reusable PreController             | 51        |
+| Patterns without a reusable PreController          | 12        |
+| Reuse rate (`Resumable Synthesis Probability`)     | 80.95 %   |
+| Average time per re-synthesis, reusable            | 699 ms    |
+| Average time per re-synthesis, non-reusable        | 838 ms    |
+| Average time per re-synthesis, all patterns        | 726 ms    |
+| Total re-synthesis time                            | 45,753 ms |
+
+Re-synthesis times count only the synthesis (`applyComposition`) in each child MTSA process; compiling the model, starting the child JVM and the parent's own overhead are excluded.
+
+Each re-synthesis also prints its own state count, transition count and memory. The screenshot below shows the end of the last re-synthesis, which happens when all six environment models change and no PreController can be reused, followed by the line `All Synthesis is Complete!`.
+
+![End of the re-synthesis log of DC(3,2) with DA-PCS](docs/screenshots/dc32_resynthesis.png)
